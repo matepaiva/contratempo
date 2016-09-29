@@ -1,0 +1,7 @@
+front/node_modules
+front/dist
+front/.tmp
+front/.sass-cache
+front/bower_components
+back/config.js
+back/node_modules

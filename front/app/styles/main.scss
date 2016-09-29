@@ -1,0 +1,363 @@
+// bower:scss
+@import "purecss-sass/vendor/assets/stylesheets/_purecss.scss";
+@import "components-font-awesome/scss/font-awesome.scss";
+// endbower
+@import url(https://fonts.googleapis.com/css?family=PT+Sans|Prompt);
+/*
+ * VARIABLES
+**/
+$h1-size: 2em;
+$h2-size: 1.5em;
+$h3-size: 1.17em;
+$h4-size: 1.12em;
+$h5-size: 0.83em;
+$h6-size: 0.75em;
+$p-size: 1em;
+$red: #ff5252;
+$footer-height: 120px;
+$header-height: 6em;
+$font-title: Prompt;
+$font-text: 'PT Sans';
+/*
+ * END OF VARIABLES
+**/
+body,
+html {
+    height: 100%;
+    width: 100%;
+}
+
+html {
+    font-family: $font-text;
+    font-size: 16px;
+    background-image: url("../images/bg5.png");
+}
+
+h1 {
+    font-size: $h1-size;
+    font-family: $font-title;
+}
+
+h2 {
+    font-size: $h2-size;
+    font-family: $font-title;
+}
+
+h3 {
+    font-size: $h3-size;
+    font-family: $font-title;
+}
+
+h4 {
+    font-size: $h4-size;
+    font-family: $font-title;
+}
+
+h5 {
+    font-size: $h5-size;
+    font-family: $font-title;
+}
+
+h6 {
+    font-size: $h6-size;
+    font-family: $font-title;
+}
+
+p {
+    font-size: $p-size;
+    font-family: $font-text;
+}
+
+.pure-g [class*="pure-u"] {
+    font-family: $font-text;
+}
+
+.wrapper {
+    min-height: 100%;
+    margin-bottom: -$footer-height;
+
+    &:after {
+        content: "";
+        display: block;
+    }
+}
+
+#sign.ng-enter,
+#signin.ng-enter,
+#signup.ng-enter {
+    transition: 0.15s linear all;
+    opacity: 0;
+}
+/* The finishing CSS styles for the enter animation */
+#sign.ng-enter.ng-enter-active,
+#signin.ng-enter.ng-enter-active,
+#signup.ng-enter.ng-enter-active {
+    opacity: 1;
+}
+
+#sign.ng-leave {
+    transition: 0.15s linear all;
+}
+
+#sign.ng-leave.ng-leave-active {
+    opacity: 0;
+}
+
+#sign {
+    padding-top: 1.5em;
+    padding-bottom: 1em;
+
+
+    .legends-container {
+        .legends {
+            background-color: lighten(black, 55%);
+            color: white;
+            padding-left: 1.2em;
+            padding-right: 0.4em;
+            font-family: $font-title;
+            display: inline-block;
+            text-align: left;
+            margin-top: 1em;
+        }
+
+        .legends {
+            font-size: $h5-size;
+
+            &:before {
+                content: "\f00c";
+                padding-right: 0.15em;
+                font-family: FontAwesome;
+                font-weight: normal;
+                font-style: normal;
+                font-size: $h3-size;
+                display: inline-block;
+                text-decoration: inherit;
+            }
+        }
+    }
+    //border-bottom: rgba($red,0.05) solid 3px;
+    background-color: rgba(black,0.03);
+
+    fieldset {
+        padding: 1em;
+    }
+
+    .field-error {
+        color: #b94a48;
+        padding: 0.3em;
+        //min-height: 1.5em;
+    }
+
+    .button-container {
+        text-align: center;
+        @media screen and (max-width:38em) {
+            text-align: center;
+        }
+
+        .button {
+            margin: 0.4em;
+        }
+    }
+}
+
+#app-menu-btn {
+    position: absolute;
+    right: 50%;
+    top: 3.6em;
+    z-index: 999;
+    //background-color: $red;
+    background-color: lighten($red, 7%);
+    color: white;
+    font-size: 1.2em;
+    width: 3em;
+    height: 3em;
+    border-radius: 100%;
+    text-align: center;
+    -webkit-box-shadow: 0 5px 21px -8px rgba(107,107,107,1);
+    -moz-box-shadow: 0 5px 21px -8px rgba(107,107,107,1);
+    box-shadow: 0 5px 21px -8px rgba(107,107,107,1);
+
+    i {
+        margin-top: 1em;
+    }
+
+    @media screen and (max-width:38em) {
+        right: 1em;
+    }
+}
+
+#app-bar {
+    height: $header-height;
+    width: 100%;
+    background-color: $red;
+
+    .slogan-container {
+        border: 0px !important;
+        list-style: none;
+        .slogan {
+            color: darken($red, 24%);
+            font-size: $h5-size;
+            background-color: white;
+            padding-left: .2em;
+            padding-right: .2em;
+        }
+
+    }
+
+    .pure-u-1-2 {
+        margin: auto;
+    }
+
+    .pure-menu-heading {
+        padding: 0.2em;
+    }
+
+    .logo {
+        display: inline-block;
+
+        a {
+            color: white;
+            font-family: $font-title;
+            font-weight: bold;
+            font-size: $h3-size;
+            @media screen and (max-width:30em) {
+                font-size: $h4-size;
+            }
+
+            &:before {
+                content: "\f017";
+                padding-right: 0.15em;
+                font-family: FontAwesome;
+                font-weight: normal;
+                font-style: normal;
+                font-size: $h1-size;
+                display: inline-block;
+                text-decoration: inherit;
+            }
+        }
+    }
+
+    #username-btn {
+        text-align: right;
+    }
+
+    .user-menu {
+        display: inline-block;
+        text-align: right;
+
+        hr {
+            border-top: 1px dotted $red;
+            border-bottom: 0;
+            margin: 2px 50px;
+        }
+
+        & > li {
+            margin-right: 2em;
+            border: 1px solid white;
+
+            & > a {
+                //text-transform: uppercase;
+                color: white;
+            }
+        }
+
+        .pure-menu-has-children > ul {
+            border: 1px dotted $red;
+            border-top: 0;
+            text-align: left;
+        }
+    }
+}
+
+main {
+    padding: 0 2em $footer-height;
+}
+
+footer {
+    height: $footer-height;
+    background-color: $red;
+    text-align: center;
+
+    &:after {
+        height: $footer-height;
+    }
+
+    * {
+        display: inline-block;
+    }
+
+    .logo {
+        color: white;
+        font-family: $font-title;
+        font-weight: bold;
+        font-size: $h6-size;
+        display: inline-block;
+
+        &:before {
+            content: "\f017";
+            padding-right: 0.15em;
+            font-family: FontAwesome;
+            font-weight: normal;
+            font-style: normal;
+            font-size: $h3-size;
+            display: inline-block;
+            text-decoration: inherit;
+        }
+    }
+
+    .slogan {
+        color: white;
+        text-transform: lowercase;
+        font-size: $h5-size;
+    }
+
+    .user-menu {
+        vertical-align: -webkit-baseline-middle;
+
+        & > li {
+            & > a {
+                text-transform: uppercase;
+                color: white;
+                font-size: $h6-size;
+            }
+        }
+
+        .pure-menu-has-children > ul {
+            border-top: 0;
+            text-align: left;
+        }
+    }
+}
+
+.button-error,
+.button-secondary,
+.button-success,
+.button-warning {
+    color: white;
+    border-radius: 4px;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+.button-secondary {
+    background: rgba($red, 1);
+    /* this is a light blue */
+}
+
+timer {
+    .unit-time-block {
+        max-width: 100px;
+        margin: 1em;
+        border: 1px solid black;
+
+        .unit-time-value {
+            text-align: center;
+            font-size: $h3-size;
+            padding: 1em;
+        }
+        .unit-time-label {
+            text-align: right;
+            font-size: $h5-size;
+            padding: .2em;
+        }
+    }
+}

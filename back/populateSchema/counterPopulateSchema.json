@@ -1,0 +1,11 @@
+{
+  "userSlug": "{{util.sample(['allie-frazier', 'andre-flores', 'anne-harris', 'annie-mendez', 'bertie-reed', 'birdie-grant', 'calvin-davidson', 'chad-fernandez', 'christina-russell', 'david-becker', 'don-summers', 'edward-higgins', 'edwin-dawson', 'elmer-mclaughlin', 'ernest-pratt', 'essie-wood', 'eva-rios', 'fannie-leonard', 'florence-copeland', 'floyd-snyder', 'gene-walker', 'harriett-bryant', 'inez-taylor', 'irene-bates', 'isabel-barrett', 'jerome-stevenson', 'josie-west', 'julian-mitchell', 'landon-myers', 'lawrence-jefferson', 'lillian-dixon', 'lucille-stevenson', 'luis-bradley', 'marion-mckenzie', 'matepaiva', 'michael-alvarez', 'mina-hansen', 'minnie-bates', 'olive-wise', 'oscar-miller', 'patrick-price', 'philip-myers', 'ralph-page', 'robert-moss', 'stanley-tate', 'troy-sutton', 'victor-romero', 'willie-collins', 'winifred-hubbard', 'winifred-zimmerman'])}}",
+  "title": "{{chance.word()}} {{chance.word()}} {{chance.word()}} {{chance.word()}}",
+  "description": "{{chance.sentence()}}",
+  "startTime": "{{chance.date()}}",
+  "slug": "{{this.title.replace(/ /g,'-')}}",
+  "img": "{{chance.word()}}/{{chance.word()}}/{{chance.word()}}.jpg",
+  "stars": [],
+  "views": "{{chance.d10()}}{{chance.d10()}}",
+  "isPromoted": false
+}

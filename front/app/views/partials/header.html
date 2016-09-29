@@ -1,0 +1,31 @@
+<div ng-controller="HeaderCtrl as header">
+    <div class="pure-g" id="app-bar">
+        <div class="pure-u-1-2">
+            <div class="logo pure-menu-heading">
+                <a class="pure-menu-link" href="#/">Contratempo</a>
+            </div>
+        </div>
+        <div class="pure-u-1-2" id="username-btn">
+            <ul class="user-menu slogan-container">
+                <li ng-if="!user" class="slogan" translate="SLOGAN"></li>
+                <li ng-if="user" class="slogan" ng-click="header.isOpenMenu = !header.isOpenMenu">
+                    Olá, {{user.firstName}}</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <a id="app-menu-btn"
+    ng-click="header.isOpenMenu = !header.isOpenMenu">
+        <i class="fa fa-chevron-down"
+        ng-class="{'fa-rotate-180': header.isOpenMenu}"></i>
+    </a>
+
+
+    <nav id="user-menu" ng-if="header.isOpenMenu && !!user">
+        <button type="button" name="button" ng-click="signout()">signout</button>
+    </nav>
+    <div id="sign"
+    ng-if="!user && header.isOpenMenu"
+    ng-include="'views/partials/sign.html'">
+    </div>
+</div>

@@ -1,0 +1,29 @@
+{
+    "SLOGAN": "Contamos com você. Literalmente.",
+    "BUTTON": {
+        "SIGNIN": "Entre",
+        "SIGNOUT": "Sair",
+        "SIGNUP": "Cadastre-se"
+    },
+    "OR": "ou",
+    "FORM": {
+        "LEGEND": {
+            "SIGNIN":"Tem algo para contar? Crie seu próprio Contratempo! Conecte-se.",
+            "SIGNUP":"Cadastre-se! Você poderá criar novos Contratempos e dar nota aos Contratempos alheios. É rapidinho."
+        },
+        "PLACEHOLDER": {
+            "PASSWORD": "Escolha uma senha",
+            "EMAIL": "Email",
+            "NAME": "Nome",
+            "DESCRIPTION": "O que você pode nos ~contar~ sobre você?",
+            "USER_SLUG": "@fulano"
+        },
+        "ERROR": {
+            "REQUIRED": "Este campo não pode ficar vazio.",
+            "EMAIL": "Hum... Isso ainda não é um e-mail.",
+            "WRONG_PASSWORD": "Ops, senha incorreta. Ou talvez seja o e-mail?",
+            "_ALREADY_EXISTS": "já está em uso. Seja original.",
+            "MINLENGTH_5": "Preencha este campo com mais de 5 caracteres."
+        }
+    }
+}
