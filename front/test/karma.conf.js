@@ -31,7 +31,6 @@ module.exports = function(config) {
       'bower_components/angular-touch/angular-touch.js',
       'bower_components/moment/moment.js',
       'bower_components/countdownjs/countdown.js',
-      'bower_components/moment-countdown/moment-countdown.js',
       'bower_components/angular-translate/angular-translate.js',
       'bower_components/ngstorage/ngStorage.js',
       'bower_components/angular-translate-loader-static-files/angular-translate-loader-static-files.js',
