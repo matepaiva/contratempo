@@ -12,6 +12,10 @@ angular.module('contratempoApp')
         var $this = this;
         var endpoint = REST_API + '/users';
 
+        $this.getUser = function(userSlug) {
+            return $http.get(endpoint + "/" + userSlug);
+        };
+
         $this.getUsers = function(query) {
             query = (query === undefined) ? {} : query;
             var queryString = (typeof query === Object) ? '' : '?';

@@ -23,7 +23,8 @@ angular
         'angular-jwt',
         'angularSpinner',
         'ngMask',
-        'timer'
+        'timer',
+        'ngImgCrop'
     ])
     .config(function($routeProvider, $translateProvider, $httpProvider) {
         $routeProvider
@@ -41,6 +42,11 @@ angular
                 templateUrl: '404.html',
                 controller: 'AboutCtrl',
                 controllerAs: 'about'
+            })
+            .when('/edit-me', {
+              templateUrl: 'views/edituser.html',
+              controller: 'EditUserCtrl',
+              controllerAs: 'editUser'
             })
             .otherwise({
                 redirectTo: '/404'

@@ -2,16 +2,32 @@ var jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
 var User = require.main.require('./models/user'); // get our mongoose model
 var Counter = require.main.require('./models/counter'); // get our mongoose model
 var config = require.main.require('./config');
+var path = require('path');
+var multer = require('multer');
+var storage = multer.diskStorage({
+    destination: function(req, file, callback) { callback(null, './uploads'); },
+    filename: function(req, file, callback) { callback(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname).toLowerCase()); }
+});
+var upload = multer({
+    storage: storage,
+    fileFilter: function(req, file, cb) {
+        var filetypes = /jpeg|jpg|png/;
+        var mimetype = filetypes.test(file.mimetype);
+        var extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+        if (mimetype && extname) return cb(null, true);
+        cb("Error: File upload only supports the following filetypes - " + filetypes);
+    },
+});
 
 module.exports = {
     getApiDocs: getApiDocs,
-    getUsers: getUsers,
-    newUser: newUser,
     getToken: getToken,
     refreshToken: refreshToken,
     deleteToken: deleteToken,
     deleteAllTokens: deleteAllTokens,
     getUser: getUser,
+    getUsers: getUsers,
+    newUser: newUser,
     editUser: editUser,
     deleteUser: deleteUser,
     getCounters: getCounters,
@@ -29,49 +45,6 @@ function getApiDocs(req, res) {
         message: 'Will receive the api docs. Coming soon...'
     });
 }
-
-// HTTP:GET users/ => get user according to query. PUBLIC.
-function getUsers(req, res) {
-    var query = ( req.query.name ? { name: req.query.name } : {} );
-    //var columns = 'userSlug -_id';
-    var columns = req.query.columns || 'name img description userSlug';
-    columns = columns.replace(/password/g, "").replace(/email/g, "");
-    var sort = req.query.sort   || 'name';
-    var limit = req.query.limit || 10;
-    var skip = req.query.page * limit || 0;
-
-    User.find(query).select(columns).sort(sort).skip(skip).limit(limit)
-    .then(function(users) {
-        res.json(users);
-    });
-}
-
-// HTTP: POST users/ => add new user to database (aka: signup). PUBLIC.
-function newUser(req, res){
-    //TODO: New user (signup): adicionar middleware para validação.
-    if (!req.body.newUser) res.status(403).end();
-
-    var newUser = new User(req.body.newUser);
-    newUser.save()
-        .then(function() {
-            _gerenateToken(user, function(token) {
-                res.json({
-                  success: true,
-                  message: 'Enjoy your token!',
-                  token: token,
-                  tokenDate: user.tokenDate
-                });
-            });
-        })
-        .catch(function(err) {
-            if (err.code === 11000) res.status(409).json({
-                errmsg: err.errmsg,
-                errcode: err.code
-            });
-            else res.json(err.errmsg);
-        });
-}
-
 
 // HTTP: PUT users/ => return a token after authenticate an existing user (aka login). PUBLIC.
 function getToken(req, res) {
@@ -130,6 +103,22 @@ function deleteAllTokens() {
     });
 }
 
+// HTTP:GET users/ => get user according to query. PUBLIC.
+function getUsers(req, res) {
+    var query = ( req.query.name ? { name: req.query.name } : {} );
+    //var columns = 'userSlug -_id';
+    var columns = req.query.columns || 'name img description userSlug';
+    columns = columns.replace(/password/g, "").replace(/email/g, "");
+    var sort = req.query.sort   || 'name';
+    var limit = req.query.limit || 10;
+    var skip = req.query.page * limit || 0;
+
+    User.find(query).select(columns).sort(sort).skip(skip).limit(limit)
+    .then(function(users) {
+        res.json(users);
+    });
+}
+
 // HTTP: GET users/:userSlug/ => Get a user according to param passed. PUBLIC.
 function getUser(req, res) {
     User.findOne({ userSlug: req.params.userSlug }, { password: 0, tokenDate: 0, email: 0, _id: 0 })
@@ -143,11 +132,58 @@ function getUser(req, res) {
     });
 }
 
+// HTTP: POST users/ => add new user to database (aka: signup). PUBLIC.
+function newUser(req, res){
+    //TODO: New user (signup): adicionar middleware para validação.
+    if (!req.body.newUser) res.status(403).end();
+
+
+    var newUser = new User({
+        name:     req.body.newUser.name,
+        email:    req.body.newUser.email,
+        password: req.body.newUser.password,
+        userSlug: req.body.newUser.userSlug,
+    });
+    newUser.save()
+        .then(function() {
+            _gerenateToken(user, function(token) {
+                res.json({
+                  success: true,
+                  message: 'Enjoy your token!',
+                  token: token,
+                  tokenDate: user.tokenDate
+                });
+            });
+        })
+        .catch(function(err) {
+            if (err.code === 11000) res.status(409).json({
+                errmsg: err.errmsg,
+                errcode: err.code
+            });
+            else res.json(err.errmsg);
+        });
+}
+
 // HTTP: PUT users/ => Edit the logged user. PRIVATE.
 function editUser(req, res) {
-    if (!res.jwtInfo) res.status(401).end();
+    if (!res.jwtInfo) return res.status(401).end();
 
-    User.update({ userSlug: req.params.userSlug }, req.body.editedUser)
+    var avatarImg;
+    upload.single('avatarImg')(req, res, function(err) {
+        if (err) return res.end("Error uploading file: " + err);
+        avatarImg = req.file.filename;
+    });
+
+    var editedUser = {
+        name:        req.body.editedUser.name,
+        email:       req.body.editedUser.email,
+        password:    req.body.editedUser.password,
+        userSlug:    req.body.editedUser.userSlug,
+        description: req.body.editedUser.description,
+        img:         avatarImg || null
+    };
+
+    User.update({ userSlug: req.params.userSlug }, editedUser)
     .then(function(status) {
         res.json(status);
     })
@@ -161,11 +197,8 @@ function deleteUser(req, res) {
     if (!res.jwtInfo) res.status(401).end();
 
     User.remove({ userSlug: res.jwtInfo.userSlug }, function(err, status) {
-        if (err) {
-            console.error(err);
-        } else {
-            res.json(status);
-        }
+        if (err) console.error(err);
+        else res.json(status);
     });
 }
 
