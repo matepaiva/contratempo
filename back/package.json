@@ -1,6 +1,6 @@
 {
   "name": "counters",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "sistema de contadores progressivos de acordo com algum tema, no estilo: 'estamos ha x dias sem y'",
   "main": "index.js",
   "scripts": {
