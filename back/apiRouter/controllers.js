@@ -3,13 +3,28 @@ var User = require.main.require('./models/user'); // get our mongoose model
 var Counter = require.main.require('./models/counter'); // get our mongoose model
 var config = require.main.require('./config');
 var path = require('path');
+
 var multer = require('multer');
-var storage = multer.diskStorage({
-    destination: function(req, file, callback) { callback(null, './uploads'); },
-    filename: function(req, file, callback) { callback(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname).toLowerCase()); }
+var Cloudinary = require('cloudinary');
+var cloudinaryStorage = require('multer-storage-cloudinary');
+Cloudinary.config(config.cloudinaryConfig);
+
+var storage = cloudinaryStorage({
+    cloudinary: Cloudinary,
+    folder: function (req, file, cb) {
+        cb(undefined, req.folder);
+    },
+    allowedFormats: ['jpg', 'png'],
+    filename: function (req, file, cb) {
+        cb(undefined, req.nameOfFile);
+    }
 });
 var upload = multer({
     storage: storage,
+    limits: {
+        fileSize: config.upload.fileSizeLimit,
+        files: config.upload.numberOfFilesLimit
+    },
     fileFilter: function(req, file, cb) {
         var filetypes = /jpeg|jpg|png/;
         var mimetype = filetypes.test(file.mimetype);
@@ -19,24 +34,34 @@ var upload = multer({
     },
 });
 
+// var storage = multer.diskStorage({
+//     destination: function(req, file, callback) { callback(null, './uploads'); },
+//     filename: function(req, file, callback) { callback(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname).toLowerCase()); }
+// });
+// var upload = multer({
+//     storage: storage,
+// });
+
 module.exports = {
-    getApiDocs: getApiDocs,
-    getToken: getToken,
-    refreshToken: refreshToken,
-    deleteToken: deleteToken,
-    deleteAllTokens: deleteAllTokens,
-    getUser: getUser,
-    getUsers: getUsers,
-    newUser: newUser,
-    editUser: editUser,
-    deleteUser: deleteUser,
-    getCounters: getCounters,
-    newCounter: newCounter,
-    getCounter: getCounter,
-    editCounter: editCounter,
-    deleteCounter: deleteCounter,
-    giveCounterStar: giveCounterStar,
-    removeCounterStar: removeCounterStar
+    getApiDocs:          getApiDocs,
+    getToken:            getToken,
+    refreshToken:        refreshToken,
+    deleteToken:         deleteToken,
+    deleteAllTokens:     deleteAllTokens,
+    getUser:             getUser,
+    getUsers:            getUsers,
+    uploadAvatar:        uploadAvatar,
+    newUser:             newUser,
+    editUser:            editUser,
+    deleteUser:          deleteUser,
+    getCounters:         getCounters,
+    newCounter:          newCounter,
+    uploadImgCounter:    uploadImgCounter,
+    getCounter:          getCounter,
+    editCounter:         editCounter,
+    deleteCounter:       deleteCounter,
+    giveCounterStar:     giveCounterStar,
+    removeCounterStar:   removeCounterStar
 };
 
 // HTTP: GET / => return the api docs. PUBLIC.
@@ -66,7 +91,7 @@ function getToken(req, res) {
 }
 
 function refreshToken(req, res) {
-    if (!res.jwtInfo) res.status(200).end();
+    if (!req.jwtInfo) res.status(200).end();
 
     _gerenateToken(user, function(token) {
         res.json({
@@ -80,9 +105,9 @@ function refreshToken(req, res) {
 
 // HTTP:DELETE users/ => Invalidate the TokenToken (aka: logout all devices). PRIVATE.
 function deleteToken(req, res) {
-    if (!res.jwtInfo) res.status(200).end();
+    if (!req.jwtInfo) res.status(200).end();
 
-    User.update({ userSlug: res.jwtInfo.userSlug }, { $pull: { tokenDate: res.jwtInfo.tokenDate } })
+    User.update({ userSlug: req.jwtInfo.userSlug }, { $pull: { tokenDate: req.jwtInfo.tokenDate } })
     .then(function(status) {
         res.json(status);
     })
@@ -92,9 +117,9 @@ function deleteToken(req, res) {
 }
 
 function deleteAllTokens() {
-    if (!res.jwtInfo) res.status(200).end();
+    if (!req.jwtInfo) res.status(200).end();
 
-    User.update({ userSlug: res.jwtInfo.userSlug }, { tokenDate: [] })
+    User.update({ userSlug: req.jwtInfo.userSlug }, { tokenDate: [] })
     .then(function(status) {
         res.json(status);
     })
@@ -110,12 +135,31 @@ function getUsers(req, res) {
     var columns = req.query.columns || 'name img description userSlug';
     columns = columns.replace(/password/g, "").replace(/email/g, "");
     var sort = req.query.sort   || 'name';
-    var limit = req.query.limit || 10;
+    var limit = +req.query.limit || 10;
     var skip = req.query.page * limit || 0;
 
     User.find(query).select(columns).sort(sort).skip(skip).limit(limit)
     .then(function(users) {
         res.json(users);
+    });
+}
+
+function uploadAvatar(req, res) {
+    if (!req.jwtInfo) return res.status(401).end();
+
+    req.folder = 'users';
+    req.nameOfFile = req.jwtInfo.userSlug + "_avatar";
+
+    upload.single('file')(req, res, function(err) {
+        if (err) return res.status(412).json(err);
+
+        User.update({ userSlug: req.jwtInfo.userSlug }, { img: req.file.secure_url })
+        .then(function(status) {
+            res.end(req.file.secure_url);
+        })
+        .catch(function(err){
+            res.json(err);
+        });
     });
 }
 
@@ -166,37 +210,28 @@ function newUser(req, res){
 
 // HTTP: PUT users/ => Edit the logged user. PRIVATE.
 function editUser(req, res) {
-    if (!res.jwtInfo) return res.status(401).end();
+    if (!req.jwtInfo) return res.status(401).end();
 
-    var avatarImg;
-    upload.single('avatarImg')(req, res, function(err) {
-        if (err) return res.end("Error uploading file: " + err);
-        avatarImg = req.file.filename;
-    });
-
-    var editedUser = {
-        name:        req.body.editedUser.name,
-        email:       req.body.editedUser.email,
-        password:    req.body.editedUser.password,
-        userSlug:    req.body.editedUser.userSlug,
-        description: req.body.editedUser.description,
-        img:         avatarImg || null
-    };
-
-    User.update({ userSlug: req.params.userSlug }, editedUser)
-    .then(function(status) {
-        res.json(status);
+    User.update({
+        userSlug: req.jwtInfo.userSlug
+    },{
+        name: req.body.name,
+        description: req.body.description
     })
-    .catch(function(err){
-        res.json(err);
-    });
+        .then(function(status) {
+            res.json(status);
+        })
+        .catch(function(err){
+            res.json(err);
+        })
+    ;
 }
 
 // HTTP: DELETE users/ => Delete a user according to param passed. PRIVATE.
 function deleteUser(req, res) {
-    if (!res.jwtInfo) res.status(401).end();
+    if (!req.jwtInfo) res.status(401).end();
 
-    User.remove({ userSlug: res.jwtInfo.userSlug }, function(err, status) {
+    User.remove({ userSlug: req.jwtInfo.userSlug }, function(err, status) {
         if (err) console.error(err);
         else res.json(status);
     });
@@ -210,12 +245,11 @@ function getCounters(req, res) {
 
     var columnsDefault = 'userSlug title description startTime counterSlug img stars views isPromoted' ;
     var columns = req.query.columns || columnsDefault;
-    var excludedColumns = ' -password -_id';
     var sort = req.query.sort   || 'title';
-    var limit = req.query.limit || 10;
+    var limit = +req.query.limit || 10;
     var skip = req.query.page * limit || 0;
 
-    Counter.find(query).select(columns + excludedColumns).sort(sort).skip(skip).limit(limit)
+    Counter.find(query).select(columns).sort(sort).skip(skip).limit(limit)
     .then(function(counters) {
         res.json(counters);
     })
@@ -226,13 +260,49 @@ function getCounters(req, res) {
 
 // HTTP: POST users/:userSlug/counters => Create a counter associating to that user. PRIVATE.
 function newCounter(req, res) {
-    if (!res.jwtInfo) res.status(401).end();
-    if (res.jwtInfo.userSlug !== req.params.userSlug) res.status(403).end();
+    if (!req.jwtInfo) return res.status(401).end();
+    if (req.jwtInfo.userSlug !== req.params.userSlug) return res.status(403).end();
+    if (!req.body.title || !req.body.description || !req.body.counterSlug) return res.status(422).end();
 
-    var newCounter = new Counter(req.body.newCounter);
+    var newCounter = new Counter({
+        // img: req.file.secure_url,
+        startTime:   new Date(),
+        userSlug:    req.jwtInfo.userSlug,
+        counterSlug: req.body.counterSlug,
+        title:       req.body.title,
+        description: req.body.description
+    });
     newCounter.save(function(err, counter) {
-        if (err) res.status(500).end();
-        else res.json(counter);
+        if (err && err.code === 11000) {
+            return res.status(409).json(err);
+        }
+        res.json(counter);
+    });
+}
+
+function uploadImgCounter(req, res) {
+    if (!req.jwtInfo) return res.status(401).end();
+    if (req.jwtInfo.userSlug !== req.params.userSlug) return res.status(403).end();
+
+    req.folder = 'counters';
+    req.nameOfFile = req.jwtInfo.userSlug + "_" + req.params.counterSlug;
+
+    upload.single('file')(req, res, function(err) {
+        if (err) return res.status(412).json(err);
+
+        Counter.update({
+            userSlug: req.jwtInfo.userSlug,
+            counterSlug: req.params.counterSlug
+        },{
+            img: req.file.secure_url
+        })
+        .then(function(status) {
+            res.end(status);
+        })
+        .catch(function(err){
+            console.log(err);
+            res.json(err);
+        });
     });
 }
 
@@ -255,8 +325,8 @@ function getCounter(req, res) {
 
 // HTTP: PUT users/:userSlug/counters/:counter => Edit a especific counter according to param passed. PRIVATE.
 function editCounter(req, res) {
-    if (!res.jwtInfo) res.status(401).end();
-    if (res.jwtInfo.userSlug !== req.params.userSlug) res.status(403).end();
+    if (!req.jwtInfo) res.status(401).end();
+    if (req.jwtInfo.userSlug !== req.params.userSlug) res.status(403).end();
 
     var query = {};
     query.userSlug = req.params.userSlug;
@@ -273,8 +343,8 @@ function editCounter(req, res) {
 
 // HTTP: DELETE users/:userSlug/counters/:counter => Delete a especific counter according to param passed. PRIVATE.
 function deleteCounter(req, res) {
-    if (!res.jwtInfo) res.status(401).end();
-    if (res.jwtInfo.userSlug !== req.params.userSlug) res.status(403).end();
+    if (!req.jwtInfo) res.status(401).end();
+    if (req.jwtInfo.userSlug !== req.params.userSlug) res.status(403).end();
 
     var query = {};
     query.userSlug = req.params.userSlug;
@@ -290,13 +360,13 @@ function deleteCounter(req, res) {
 }
 
 function giveCounterStar(req, res) {
-    if (!res.jwtInfo) res.status(401).end();
+    if (!req.jwtInfo) res.status(401).end();
 
     var query = {};
     query.counterSlug = req.params.counterSlug;
-    query.stars = { $ne: res.jwtInfo.userSlug };
+    query.stars = { $ne: req.jwtInfo.userSlug };
 
-    Counter.update(query, { $push: { stars: res.jwtInfo.userSlug } })
+    Counter.update(query, { $push: { stars: req.jwtInfo.userSlug } })
     .then(function(status) {
         res.json(status);
     })
@@ -306,13 +376,13 @@ function giveCounterStar(req, res) {
 }
 
 function removeCounterStar(req, res) {
-    if (!res.jwtInfo) res.status(401).end();
+    if (!req.jwtInfo) res.status(401).end();
 
     var query = {};
     query.counterSlug = req.params.counterSlug;
-    query.stars = res.jwtInfo.userSlug;
+    query.stars = req.jwtInfo.userSlug;
 
-    Counter.update(query, { $pull: { stars: res.jwtInfo.userSlug } })
+    Counter.update(query, { $pull: { stars: req.jwtInfo.userSlug } })
     .then(function(status) {
         res.json(status);
     })

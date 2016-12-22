@@ -27,14 +27,19 @@ apiRouter.post('/users', controllers.newUser);
 apiRouter.put('/users', controllers.editUser);
 apiRouter.delete('/users', controllers.deleteUser);
 
+apiRouter.post('/users/avatar', controllers.uploadAvatar);
+
 apiRouter.get('/users/:userSlug', controllers.getUser);
 
 apiRouter.get('/users/:userSlug/counters', controllers.getCounters);
 apiRouter.post('/users/:userSlug/counters', controllers.newCounter);
 
+
 apiRouter.get('/users/:userSlug/counters/:counterSlug', controllers.getCounter);
 apiRouter.put('/users/:userSlug/counters/:counterSlug', controllers.editCounter);
 apiRouter.delete('/users/:userSlug/counters/:counterSlug', controllers.deleteCounter);
+
+apiRouter.post('/users/:userSlug/counters/:counterSlug/img', controllers.uploadImgCounter);
 
 apiRouter.put('/users/:userSlug/counters/:counterSlug/star', controllers.giveCounterStar);
 apiRouter.delete('/users/:userSlug/counters/:counterSlug/star', controllers.removeCounterStar);

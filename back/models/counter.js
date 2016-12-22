@@ -7,10 +7,10 @@ module.exports = mongoose.model('Counter', new Schema({
     userSlug:    { type: String, required: true },
     title:       { type: String, required: true, index: { unique: true} },
     description: { type: String, required: true },
-    startTime:   { type: Date },
+    startTime:   { type: Date, defalt: new Date() },
     counterSlug: { type: String, required: true },
     img:         { type: String },
     stars:       { type: Array },
-    views:       { type: Number },
+    views:       { type: Number, default: 0 },
     isPromoted:  { type: Boolean }
 }));

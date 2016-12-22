@@ -9,6 +9,7 @@ module.exports = {
 
 // check if token exists and is valid.
 function authenticateUser(req, res, next) {
+    req.jwtInfo = null;
     var token = req.body.token || req.query.token || req.headers['x-access-token'] || req.headers.token;
 
     if (token) {
@@ -21,7 +22,7 @@ function authenticateUser(req, res, next) {
                 })
                 .then(function(user) {
                     if (user) {
-                        res.jwtInfo = decoded;
+                        req.jwtInfo = decoded;
                     }
                     next();
                 });

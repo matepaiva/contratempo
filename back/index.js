@@ -3,7 +3,6 @@ var app = express();
 var bodyParser = require('body-parser');
 var morgan = require('morgan');
 var mongoose = require('mongoose');
-
 var config = require('./config'); // get our config file
 
 
@@ -15,15 +14,13 @@ app.set('jwtSecret', config.jwtSecret); // secret variable
 app.use(bodyParser.urlencoded({
     extended: false
 }));
+
 app.use(bodyParser.json());
+
 app.use(morgan('dev'));
 
 app.use(function(req, res, next) {
-  var allowedOrigins = ['http://127.0.0.1:8020', 'http://localhost:8020', 'http://127.0.0.1:9000', 'http://localhost:9000'];
   var origin = req.headers.origin;
-  // if(allowedOrigins.indexOf(origin) > -1){
-  //      res.setHeader('Access-Control-Allow-Origin', origin);
-  // }
   res.header('Access-Control-Allow-Origin', origin);
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-access-token');
