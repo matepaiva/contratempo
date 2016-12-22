@@ -1,0 +1,38 @@
+<md-toolbar class="md-hue-2">
+    <div class="md-toolbar-tools">
+        <md-icon>timer</md-icon>&nbsp
+        <h3><span>{{$ctrl.name}}</span></h3>
+        <span flex></span>
+
+
+
+        <md-button ng-if="false" class="md-raised" aria-label="Learn More">
+            Entrar
+        </md-button>
+
+        <md-menu>
+            <md-button ng-click="$ctrl.openMenu($mdOpenMenu, $event)">
+                <img ng-src="{{'http://res.cloudinary.com/matepaiva/image/upload/v1479804586/avatar/avatar_matepaiva.png'}}" class="md-raised user-avatar" alt="user image" />
+                <md-icon>more_vert</md-icon>
+            </md-button>
+
+            <md-menu-content width="4"
+            ng-init="">
+                <md-menu-item ng-repeat="item in $ctrl.userMenu1">
+                    <md-button ng-disabled="item.isDisabled" ng-click="item.functionality()">
+                        <md-icon md-menu-align-target>{{item.icon}}</md-icon>
+                        {{item.text}}
+                    </md-button>
+                </md-menu-item>
+                <md-menu-divider></md-menu-divider>
+                <md-menu-item ng-repeat="item in $ctrl.userMenu2">
+                    <md-button ng-disabled="item.isDisabled" ng-click="item.functionality()">
+                        <md-icon md-menu-align-target>{{item.icon}}</md-icon>
+                        {{item.text}}
+                    </md-button>
+                </md-menu-item>
+            </md-menu-content>
+        </md-menu>
+
+    </div>
+</md-toolbar>
